@@ -27,11 +27,12 @@
     .clouds {
       position: absolute;
       width: 200%;
-      height: 100px;
-      background: url('https://i.imgur.com/5qRP3Xz.png') repeat-x;
+      height: 120px;
+      background: url('https://i.imgur.com/J6qOtjF.png') repeat-x;
       animation: moveClouds 60s linear infinite;
-      top: 20px;
+      top: 30px;
       opacity: 0.4;
+      z-index: 0;
     }
 
     @keyframes moveClouds {
@@ -56,51 +57,51 @@
       position: absolute;
       left: 50px;
       bottom: 60px;
-      width: 20px;
+      width: 30px;
       height: 80px;
       background: transparent;
     }
 
-    /* stickman body parts */
     .stickman .head {
-      width: 20px;
-      height: 20px;
+      width: 24px;
+      height: 24px;
       background: black;
       border-radius: 50%;
       margin: 0 auto;
     }
 
     .stickman .body {
-      width: 2px;
-      height: 40px;
+      width: 4px;
+      height: 35px;
       background: black;
       margin: 0 auto;
     }
 
     .stickman .arms {
-      width: 30px;
-      height: 2px;
+      width: 40px;
+      height: 4px;
       background: black;
+      margin: 5px auto;
       position: relative;
-      left: -7px;
+      top: -20px;
     }
 
     .stickman .legs {
-      width: 2px;
-      height: 20px;
+      width: 4px;
+      height: 25px;
       background: black;
       position: absolute;
-      left: 5px;
+      left: 8px;
       top: 60px;
     }
 
     .stickman .legs::after {
       content: '';
       position: absolute;
-      width: 2px;
-      height: 20px;
+      width: 4px;
+      height: 25px;
       background: black;
-      left: 10px;
+      left: 12px;
       top: 0;
     }
 
@@ -126,7 +127,7 @@
       right: -100px;
       width: 60px;
       height: 40px;
-      background: url('https://i.imgur.com/nVHngJx.png') no-repeat center/contain;
+      background: url('https://i.imgur.com/9yPOCyY.png') no-repeat center/contain;
       animation: moveObstacle 2s linear infinite;
     }
 
@@ -176,9 +177,15 @@
     <div class="ground"></div>
     <div class="game-over" id="gameOver">
       Game Over!<br>
-      Press Space / Arrow or Click Here to Play Again
+      Play Again
     </div>
   </div>
+
+  <!-- Background and effect sounds -->
+  <audio id="bgMusic" src="https://cdn.pixabay.com/download/audio/2022/10/03/audio_7c24f281f3.mp3" loop autoplay></audio>
+  <audio id="jumpSound" src="https://freesound.org/data/previews/341/341695_62600-lq.mp3"></audio>
+  <audio id="hitSound" src="https://freesound.org/data/previews/331/331912_3248244-lq.mp3"></audio>
+  <audio id="pointSound" src="https://freesound.org/data/previews/458/458740_8045-lq.mp3"></audio>
 
   <script>
     const stickman = document.getElementById("stickman");
@@ -187,23 +194,31 @@
     const scoreDisplay = document.getElementById("score");
     const highScoreDisplay = document.getElementById("highScore");
 
+    const bgMusic = document.getElementById("bgMusic");
+    const jumpSound = document.getElementById("jumpSound");
+    const hitSound = document.getElementById("hitSound");
+    const pointSound = document.getElementById("pointSound");
+
     let score = 0;
     let highScore = localStorage.getItem("highScore") || 0;
     highScoreDisplay.innerText = highScore;
     let gameActive = true;
 
-    // Score counter
     let scoreInterval = setInterval(() => {
       if (gameActive) {
         score++;
         scoreDisplay.innerText = score;
+        if (score % 5 === 0) {
+          pointSound.play();
+        }
       }
     }, 200);
 
-    // Jump function
     function jump() {
       if (!stickman.classList.contains("jump")) {
         stickman.classList.add("jump");
+        jumpSound.currentTime = 0;
+        jumpSound.play();
         setTimeout(() => {
           stickman.classList.remove("jump");
         }, 500);
@@ -222,7 +237,6 @@
       location.reload();
     });
 
-    // Collision detection
     let collisionCheck = setInterval(() => {
       let stickmanBottom = parseInt(window.getComputedStyle(stickman).getPropertyValue("bottom"));
       let obstacleRight = parseInt(window.getComputedStyle(obstacle).getPropertyValue("right"));
@@ -238,6 +252,7 @@
         gameOver.style.display = "block";
         gameActive = false;
         clearInterval(scoreInterval);
+        hitSound.play();
 
         if (score > highScore) {
           localStorage.setItem("highScore", score);
