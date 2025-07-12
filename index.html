@@ -1,189 +1,241 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stickman Game</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stickman Jump Game</title>
   <style>
+    * { box-sizing: border-box; }
     body {
       margin: 0;
-      background: #0f0f0f;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: white;
-      text-align: center;
+      background: linear-gradient(to top, #6dd5fa, #2980b9);
+      overflow: hidden;
+      font-family: sans-serif;
     }
-    canvas {
+    #gameCanvas {
       display: block;
-      margin: 20px auto;
-      background: #111;
-      border: 2px solid #555;
+      margin: auto;
+      background: #87ceeb;
+      border: 2px solid #444;
     }
     #scoreboard {
-      margin-top: -10px;
-      font-size: 20px;
-    }
-    #gameOver {
-      display: none;
-      font-size: 24px;
-      color: #ff4c4c;
-    }
-    button {
+      color: #fff;
+      text-align: center;
+      font-size: 1.5em;
       margin-top: 10px;
-      padding: 10px 20px;
-      background: #bc6ff1;
-      border: none;
+    }
+    #gameOverScreen {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       color: white;
-      font-size: 16px;
-      cursor: pointer;
+      text-align: center;
+      display: none;
+    }
+    #gameOverScreen button {
+      padding: 10px 20px;
+      font-size: 1em;
+      margin-top: 10px;
+      background-color: #fff;
+      color: #000;
+      border: none;
       border-radius: 5px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <h1>Stickman Jump Challenge</h1>
-  <canvas id="gameCanvas" width="800" height="400"></canvas>
-  <div id="scoreboard">
-    <span>Score: <span id="score">0</span></span> | 
-    <span>High Score: <span id="highScore">0</span></span>
-  </div>
-  <div id="gameOver">
-    <p>Game Over! 😵</p>
+  <canvas id="gameCanvas" width="400" height="300"></canvas>
+  <div id="scoreboard">Score: <span id="score">0</span> | High Score: <span id="highScore">0</span></div>
+  <div id="gameOverScreen">
+    <h1>Game Over</h1>
     <button onclick="restartGame()">Play Again?</button>
   </div>
+  <audio id="jumpSound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3"></audio>
+  <audio id="gameOverSound" src="https://www.soundjay.com/button/sounds/button-10.mp3"></audio>
+  <audio id="bgMusic" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_5ef603e53c.mp3?filename=bubbly-tropical-house-162123.mp3" loop autoplay></audio>
 
   <script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const jumpSound = document.getElementById("jumpSound");
+    const gameOverSound = document.getElementById("gameOverSound");
+    const bgMusic = document.getElementById("bgMusic");
 
-    let stickman;
+    let stickman = {
+      x: 50,
+      y: 0,
+      vy: 0,
+      width: 20,
+      height: 40,
+      onGround: false
+    };
+
     let platforms = [];
-    let gravity = 0.8;
-    let jumpForce = -12;
-    let gameSpeed = 4;
+    let clouds = [];
+    let gravity = 0.7;
+    let jumpForce = -10;
+    let gameSpeed = 2;
     let score = 0;
-    let highScore = 0;
-    let gameRunning = true;
+    let highScore = localStorage.getItem("highScore") || 0;
+    let gameOver = false;
 
-    function resetGame() {
-      stickman = {
-        x: 50,
-        y: 310,
-        vy: 0,
-        width: 20,
-        height: 50,
-        onGround: false
-      };
-      platforms = [];
-      score = 0;
-      gameRunning = true;
-      document.getElementById('gameOver').style.display = 'none';
-    }
+    function drawStickman() {
+      ctx.strokeStyle = "#000";
+      ctx.lineWidth = 2;
 
-    function drawStickman(x, y) {
-      ctx.strokeStyle = '#0ff';
-      ctx.lineWidth = 3;
       // Head
       ctx.beginPath();
-      ctx.arc(x + 10, y + 10, 10, 0, Math.PI * 2);
+      ctx.arc(stickman.x + 10, stickman.y, 10, 0, Math.PI * 2);
       ctx.stroke();
+
       // Body
       ctx.beginPath();
-      ctx.moveTo(x + 10, y + 20);
-      ctx.lineTo(x + 10, y + 40);
+      ctx.moveTo(stickman.x + 10, stickman.y + 10);
+      ctx.lineTo(stickman.x + 10, stickman.y + 30);
       ctx.stroke();
+
       // Arms
       ctx.beginPath();
-      ctx.moveTo(x, y + 30);
-      ctx.lineTo(x + 20, y + 30);
+      ctx.moveTo(stickman.x + 10, stickman.y + 15);
+      ctx.lineTo(stickman.x - 5, stickman.y + 25);
+      ctx.moveTo(stickman.x + 10, stickman.y + 15);
+      ctx.lineTo(stickman.x + 25, stickman.y + 25);
       ctx.stroke();
+
       // Legs
       ctx.beginPath();
-      ctx.moveTo(x + 10, y + 40);
-      ctx.lineTo(x, y + 60);
-      ctx.moveTo(x + 10, y + 40);
-      ctx.lineTo(x + 20, y + 60);
+      ctx.moveTo(stickman.x + 10, stickman.y + 30);
+      ctx.lineTo(stickman.x, stickman.y + 50);
+      ctx.moveTo(stickman.x + 10, stickman.y + 30);
+      ctx.lineTo(stickman.x + 20, stickman.y + 50);
       ctx.stroke();
     }
 
     function spawnPlatform() {
-      const height = Math.random() < 0.5 ? 20 : 80; // random height (low or raised)
-      platforms.push({
-        x: canvas.width,
-        y: canvas.height - height,
-        width: 60,
-        height
-      });
+      let height = 10;
+      let width = Math.random() * 50 + 30;
+      let y = Math.random() < 0.5 ? canvas.height - 40 : canvas.height - 80;
+      platforms.push({ x: canvas.width, y, width, height });
+    }
+
+    function spawnCloud() {
+      clouds.push({ x: canvas.width, y: Math.random() * 100 + 20, width: 40 + Math.random() * 30, speed: 0.5 });
     }
 
     function update() {
-      if (!gameRunning) return;
+      if (gameOver) return;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Stickman physics
+      // Clouds
+      ctx.fillStyle = "#fff";
+      clouds.forEach((cloud, i) => {
+        ctx.beginPath();
+        ctx.ellipse(cloud.x, cloud.y, cloud.width, 20, 0, 0, Math.PI * 2);
+        ctx.fill();
+        cloud.x -= cloud.speed;
+        if (cloud.x + cloud.width < 0) clouds.splice(i, 1);
+      });
+
+      // Physics
       stickman.vy += gravity;
       stickman.y += stickman.vy;
 
-      if (stickman.y > canvas.height - stickman.height) {
+      if (stickman.y + stickman.height >= canvas.height) {
         stickman.y = canvas.height - stickman.height;
         stickman.vy = 0;
         stickman.onGround = true;
       }
 
-      drawStickman(stickman.x, stickman.y);
+      // Draw stickman
+      drawStickman();
 
+      // Platforms
+      ctx.fillStyle = "#654321";
       platforms.forEach((plat, i) => {
         plat.x -= gameSpeed;
-        ctx.fillStyle = '#f0f';
         ctx.fillRect(plat.x, plat.y, plat.width, plat.height);
 
-        // Collision check (game over)
+        // Collision detection
         if (
           stickman.x < plat.x + plat.width &&
           stickman.x + stickman.width > plat.x &&
-          stickman.y + stickman.height > plat.y &&
-          stickman.y < plat.y + plat.height
+          stickman.y + stickman.height < plat.y + 15 &&
+          stickman.y + stickman.height > plat.y
         ) {
-          gameOver();
+          stickman.y = plat.y - stickman.height;
+          stickman.vy = 0;
+          stickman.onGround = true;
+        }
+
+        if (
+          stickman.x < plat.x + plat.width &&
+          stickman.x + stickman.width > plat.x &&
+          stickman.y + stickman.height >= plat.y &&
+          stickman.y <= plat.y + plat.height
+        ) {
+          endGame();
         }
 
         if (plat.x + plat.width < 0) {
           platforms.splice(i, 1);
           score++;
-          document.getElementById('score').innerText = score;
-          if (score > highScore) {
-            highScore = score;
-            document.getElementById('highScore').innerText = highScore;
-          }
+          gameSpeed += 0.01;
+          document.getElementById("score").innerText = score;
         }
       });
 
       requestAnimationFrame(update);
     }
 
-    function gameOver() {
-      gameRunning = false;
-      document.getElementById('gameOver').style.display = 'block';
+    function endGame() {
+      gameOver = true;
+      document.getElementById("gameOverScreen").style.display = "block";
+      gameOverSound.play();
+      if (score > highScore) {
+        highScore = score;
+        localStorage.setItem("highScore", highScore);
+        document.getElementById("highScore").innerText = highScore;
+      }
     }
 
     function restartGame() {
-      resetGame();
+      score = 0;
+      gameSpeed = 2;
+      platforms = [];
+      stickman.y = canvas.height - stickman.height;
+      stickman.vy = 0;
+      stickman.onGround = true;
+      document.getElementById("score").innerText = score;
+      document.getElementById("gameOverScreen").style.display = "none";
+      gameOver = false;
       update();
     }
 
-    document.addEventListener('keydown', (e) => {
-      if ((e.code === 'Space' || e.code === 'ArrowUp') && stickman.onGround && gameRunning) {
+    document.addEventListener("keydown", (e) => {
+      if ((e.code === "Space" || e.code === "ArrowUp") && stickman.onGround && !gameOver) {
         stickman.vy = jumpForce;
         stickman.onGround = false;
+        jumpSound.play();
       }
     });
 
-    setInterval(() => {
-      if (gameRunning) spawnPlatform();
-    }, 1300);
+    // Touch support
+    document.addEventListener("touchstart", () => {
+      if (stickman.onGround && !gameOver) {
+        stickman.vy = jumpForce;
+        stickman.onGround = false;
+        jumpSound.play();
+      }
+    });
 
-    resetGame();
-    update();
+    setInterval(spawnPlatform, 1800);
+    setInterval(spawnCloud, 3000);
+
+    document.getElementById("highScore").innerText = highScore;
+    restartGame();
   </script>
 </body>
 </html>
