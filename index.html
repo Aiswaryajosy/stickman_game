@@ -58,30 +58,31 @@
       left: 50px;
       bottom: 60px;
       width: 40px;
-      height: 100px;
+      height: 120px;
       background: transparent;
+      display: flex;
       flex-direction: column;
       align-items: center;
     }
 
     .stickman .head {
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
       background: black;
       border-radius: 50%;
-      margin-bottom: 4px;
+      margin-bottom: 5px;
     }
 
     .stickman .body {
       width: 4px;
-      height: 40px;
+      height: 45px;
       background: black;
       position: relative;
     }
 
     .stickman .left-arm,
     .stickman .right-arm {
-      width: 20px;
+      width: 18px;
       height: 4px;
       background: black;
       position: absolute;
@@ -89,13 +90,15 @@
     }
     
     .stickman .left-arm {
-      left: -20px;
-      transform: rotate(20deg);
+      left: -18px;
+      transform: rotate(25deg);
+      transform-origin: left center;
     }
     
     .stickman .right-arm {
-      right: -20px;
-      transform: rotate(-20deg):
+      right: -18px;
+      transform: rotate(-25deg):
+      transform-origin: right center;
     }
     
     .stickman .left-leg,
