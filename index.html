@@ -12,7 +12,6 @@
     }
 
     body {
-      background: #f0f0f0;
       font-family: sans-serif;
       overflow: hidden;
     }
@@ -21,59 +20,88 @@
       position: relative;
       width: 100vw;
       height: 100vh;
-      background: #fff;
-      border-top: 5px solid #333;
+      background: linear-gradient(to top, #87CEFA, #B0E0E6); /* sky gradient */
+      overflow: hidden;
+    }
+
+    .clouds {
+      position: absolute;
+      width: 200%;
+      height: 100px;
+      background: url('https://i.imgur.com/5qRP3Xz.png') repeat-x;
+      animation: moveClouds 60s linear infinite;
+      top: 20px;
+      opacity: 0.4;
+    }
+
+    @keyframes moveClouds {
+      0% {
+        background-position: 0 0;
+      }
+      100% {
+        background-position: -1000px 0;
+      }
+    }
+
+    .ground {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 60px;
+      background: linear-gradient(to top, #228B22, #32CD32);
+      z-index: 0;
     }
 
     .stickman {
       position: absolute;
       left: 50px;
-      bottom: 50px;
+      bottom: 60px;
       width: 20px;
-      height: 60px;
+      height: 80px;
       background: transparent;
     }
 
-    /* Stickman drawing using divs */
-    .stickman::before,
-    .stickman::after {
-      content: "";
-      position: absolute;
-      background: #000;
-    }
-
-    .stickman::before {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      top: -20px;
-      left: 5px;
-    }
-
-    .stickman::after {
-      width: 2px;
-      height: 60px;
-      top: 0;
-      left: 9px;
-    }
-
-    .obstacle {
-      position: absolute;
-      bottom: 50px;
-      right: -50px;
+    /* stickman body parts */
+    .stickman .head {
       width: 20px;
-      height: 40px;
-      background-color: #333;
-      animation: moveObstacle 2s linear infinite;
+      height: 20px;
+      background: black;
+      border-radius: 50%;
+      margin: 0 auto;
     }
 
-    @keyframes moveObstacle {
-      0% {
-        right: -50px;
-      }
-      100% {
-        right: 100vw;
-      }
+    .stickman .body {
+      width: 2px;
+      height: 40px;
+      background: black;
+      margin: 0 auto;
+    }
+
+    .stickman .arms {
+      width: 30px;
+      height: 2px;
+      background: black;
+      position: relative;
+      left: -7px;
+    }
+
+    .stickman .legs {
+      width: 2px;
+      height: 20px;
+      background: black;
+      position: absolute;
+      left: 5px;
+      top: 60px;
+    }
+
+    .stickman .legs::after {
+      content: '';
+      position: absolute;
+      width: 2px;
+      height: 20px;
+      background: black;
+      left: 10px;
+      top: 0;
     }
 
     .jump {
@@ -82,46 +110,97 @@
 
     @keyframes jump {
       0% {
-        bottom: 50px;
+        bottom: 60px;
       }
       50% {
-        bottom: 150px;
+        bottom: 160px;
       }
       100% {
-        bottom: 50px;
+        bottom: 60px;
+      }
+    }
+
+    .obstacle {
+      position: absolute;
+      bottom: 60px;
+      right: -100px;
+      width: 60px;
+      height: 40px;
+      background: url('https://i.imgur.com/nVHngJx.png') no-repeat center/contain;
+      animation: moveObstacle 2s linear infinite;
+    }
+
+    @keyframes moveObstacle {
+      0% {
+        right: -60px;
+      }
+      100% {
+        right: 100vw;
       }
     }
 
     .game-over {
       position: absolute;
-      top: 40%;
+      top: 30%;
       left: 50%;
       transform: translate(-50%, -50%);
       font-size: 2rem;
       color: red;
+      text-align: center;
       display: none;
+    }
+
+    .scoreboard {
+      position: absolute;
+      top: 10px;
+      left: 20px;
+      font-size: 1.2rem;
+      color: #222;
     }
   </style>
 </head>
 <body>
   <div class="game-container" id="game">
-    <div class="stickman" id="stickman"></div>
+    <div class="clouds"></div>
+    <div class="scoreboard">
+      Score: <span id="score">0</span><br>
+      High Score: <span id="highScore">0</span>
+    </div>
+    <div class="stickman" id="stickman">
+      <div class="head"></div>
+      <div class="arms"></div>
+      <div class="body"></div>
+      <div class="legs"></div>
+    </div>
     <div class="obstacle" id="obstacle"></div>
-    <div class="game-over" id="gameOver">Game Over! Refresh to Restart</div>
+    <div class="ground"></div>
+    <div class="game-over" id="gameOver">
+      Game Over!<br>
+      Press Space / Arrow or Click Here to Play Again
+    </div>
   </div>
 
   <script>
     const stickman = document.getElementById("stickman");
     const obstacle = document.getElementById("obstacle");
     const gameOver = document.getElementById("gameOver");
+    const scoreDisplay = document.getElementById("score");
+    const highScoreDisplay = document.getElementById("highScore");
+
+    let score = 0;
+    let highScore = localStorage.getItem("highScore") || 0;
+    highScoreDisplay.innerText = highScore;
+    let gameActive = true;
+
+    // Score counter
+    let scoreInterval = setInterval(() => {
+      if (gameActive) {
+        score++;
+        scoreDisplay.innerText = score;
+      }
+    }, 200);
 
     // Jump function
-    document.addEventListener("keydown", function (e) {
-      if (e.code === "Space" || e.key === " ") {
-        jump();
-      }
-    });
-
     function jump() {
       if (!stickman.classList.contains("jump")) {
         stickman.classList.add("jump");
@@ -131,22 +210,38 @@
       }
     }
 
+    document.addEventListener("keydown", function (e) {
+      if (!gameActive && (e.code === "Space" || e.code.includes("Arrow"))) {
+        location.reload();
+      } else if (e.code === "Space" || e.code.includes("Arrow")) {
+        jump();
+      }
+    });
+
+    gameOver.addEventListener("click", () => {
+      location.reload();
+    });
+
     // Collision detection
-    let checkCollision = setInterval(() => {
-      let stickmanBottom = parseInt(
-        window.getComputedStyle(stickman).getPropertyValue("bottom")
-      );
-      let obstacleRight = parseInt(
-        window.getComputedStyle(obstacle).getPropertyValue("right")
-      );
+    let collisionCheck = setInterval(() => {
+      let stickmanBottom = parseInt(window.getComputedStyle(stickman).getPropertyValue("bottom"));
+      let obstacleRight = parseInt(window.getComputedStyle(obstacle).getPropertyValue("right"));
 
       if (
-        obstacleRight > window.innerWidth - 100 && obstacleRight < window.innerWidth - 30 &&
-        stickmanBottom < 90
+        obstacleRight > window.innerWidth - 120 &&
+        obstacleRight < window.innerWidth - 40 &&
+        stickmanBottom < 100 &&
+        gameActive
       ) {
         obstacle.style.animation = "none";
+        obstacle.style.right = obstacleRight + "px";
         gameOver.style.display = "block";
-        clearInterval(checkCollision);
+        gameActive = false;
+        clearInterval(scoreInterval);
+
+        if (score > highScore) {
+          localStorage.setItem("highScore", score);
+        }
       }
     }, 10);
   </script>
