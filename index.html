@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Stickman Jump</title>
+  <style>
+    body {
+      margin: 0;
+      background: #0f0f0f;
+      color: white;
+      text-align: center;
+      font-family: sans-serif;
+    }
+    h1 {
+      color: #bc6ff1;
+    }
+    canvas {
+      background: #222;
+      display: block;
+      margin: 30px auto;
+      border: 2px solid #555;
+    }
+  </style>
+</head>
+<body>
+  <h1>Stickman Jump Game</h1>
+  <canvas id="gameCanvas" width="480" height="240"></canvas>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let stickman = { x: 50, y: 190, vy: 0, width: 20, height: 40, onGround: true };
+    let platforms = [];
+    const gravity = 0.8;
+    const jumpForce = -12;
+    const gameSpeed = 3;
+
+    document.addEventListener("keydown", (e) => {
+      if ((e.code === "Space" || e.code === "ArrowUp") && stickman.onGround) {
+        stickman.vy = jumpForce;
+        stickman.onGround = false;
+      }
+    });
+
+    function spawnPlatform() {
+      platforms.push({ x: canvas.width, y: canvas.height - 20, width: 60, height: 20 });
+    }
+
+    function update() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      stickman.vy += gravity;
+      stickman.y += stickman.vy;
+
+      if (stickman.y > canvas.height - stickman.height) {
+        stickman.y = canvas.height - stickman.height;
+        stickman.vy = 0;
+        stickman.onGround = true;
+      }
+
+      ctx.fillStyle = "#0ff";
+      ctx.fillRect(stickman.x, stickman.y, stickman.width, stickman.height);
+
+      platforms.forEach((plat, i) => {
+        plat.x -= gameSpeed;
+        ctx.fillStyle = "#f0f";
+        ctx.fillRect(plat.x, plat.y, plat.width, plat.height);
+
+        if (
+          stickman.x < plat.x + plat.width &&
+          stickman.x + stickman.width > plat.x &&
+          stickman.y + stickman.height > plat.y &&
+          stickman.y + stickman.height < plat.y + plat.height
+        ) {
+          stickman.y = plat.y - stickman.height;
+          stickman.vy = 0;
+          stickman.onGround = true;
+        }
+
+        if (plat.x + plat.width < 0) platforms.splice(i, 1);
+      });
+
+      requestAnimationFrame(update);
+    }
+
+    setInterval(spawnPlatform, 1500);
+    update();
+  </script>
+</body>
+</html>
