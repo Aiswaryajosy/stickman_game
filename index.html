@@ -60,6 +60,8 @@
       width: 40px;
       height: 100px;
       background: transparent;
+      flex-direction: column;
+      align-items: center;
     }
 
     .stickman .head {
@@ -67,42 +69,52 @@
       height: 24px;
       background: black;
       border-radius: 50%;
-      margin: 0 auto;
+      margin-bottom: 4px;
     }
 
     .stickman .body {
       width: 4px;
       height: 40px;
       background: black;
-      margin: 0 auto;
+      position: relative;
     }
 
-    .stickman .arms {
-      width: 40px;
+    .stickman .left-arm,
+    .stickman .right-arm {
+      width: 20px;
       height: 4px;
       background: black;
-      margin: 5px auto;
-      position: relative;
-      top: -22px;
+      position: absolute;
+      top: 10px;
     }
-
-    .stickman .legs {
+    
+    .stickman .left-arm {
+      left: -20px;
+      transform: rotate(20deg);
+    }
+    
+    .stickman .right-arm {
+      right: -20px;
+      transform: rotate(-20deg):
+    }
+    
+    .stickman .left-leg,
+    .stickman .right-leg {
       width: 4px;
       height: 30px;
       background: black;
       position: absolute;
-      left: 10px;
-      top: 72px;
+      bottom: -30px;
     }
 
-    .stickman .legs::after {
-      content: '';
-      position: absolute;
-      width: 4px;
-      height: 30px;
-      background: black;
-      left: 16px;
-      top: 0;
+    .stickman .left-leg {
+      left: -6px;
+      transform: rotate(10deg);
+    }
+
+    .stickman .right-leg {
+      right: -6px;
+      transform: rotate(-10deg);
     }
 
     .jump {
@@ -169,9 +181,12 @@
     </div>
     <div class="stickman" id="stickman">
       <div class="head"></div>
-      <div class="arms"></div>
-      <div class="body"></div>
-      <div class="legs"></div>
+      <div class="body">
+        <div class="left-arm"></div>
+        <div class="right-arm"></div>
+        <div class="left-leg"></div>
+        <div class="right-leg"></div>
+      </div>
     </div>
     <div class="obstacle" id="obstacle"></div>
     <div class="ground"></div>
