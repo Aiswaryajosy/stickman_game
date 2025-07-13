@@ -141,77 +141,93 @@
   <audio id="pointSound" src="https://freesound.org/data/previews/458/458740_8045-lq.mp3"></audio>
 
   <script>
-    const stickman = document.getElementById("stickman");
-    const obstacle = document.getElementById("obstacle");
-    const gameOver = document.getElementById("gameOver");
-    const scoreDisplay = document.getElementById("score");
-    const highScoreDisplay = document.getElementById("highScore");
+  const stickman = document.getElementById("stickman");
+  const obstacle = document.getElementById("obstacle");
+  const gameOver = document.getElementById("gameOver");
+  const scoreDisplay = document.getElementById("score");
+  const highScoreDisplay = document.getElementById("highScore");
 
-    const bgMusic = document.getElementById("bgMusic");
-    const jumpSound = document.getElementById("jumpSound");
-    const hitSound = document.getElementById("hitSound");
-    const pointSound = document.getElementById("pointSound");
+  const bgMusic = document.getElementById("bgMusic");
+  const jumpSound = document.getElementById("jumpSound");
+  const hitSound = document.getElementById("hitSound");
+  const pointSound = document.getElementById("pointSound");
 
-    let score = 0;
-    let highScore = localStorage.getItem("highScore") || 0;
-    highScoreDisplay.innerText = highScore;
-    let gameActive = true;
+  let score = 0;
+  let highScore = localStorage.getItem("highScore") || 0;
+  highScoreDisplay.innerText = highScore;
+  let gameActive = true;
 
-    let scoreInterval = setInterval(() => {
-      if (gameActive) {
-        score++;
-        scoreDisplay.innerText = score;
-        if (score % 5 === 0) {
-          pointSound.play();
-        }
-      }
-    }, 200);
-
-    function jump() {
-      if (!stickman.classList.contains("jump")) {
-        stickman.classList.add("jump");
-        jumpSound.currentTime = 0;
-        jumpSound.play();
-        setTimeout(() => {
-          stickman.classList.remove("jump");
-        }, 500);
+  let scoreInterval = setInterval(() => {
+    if (gameActive) {
+      score++;
+      scoreDisplay.innerText = score;
+      if (score % 5 === 0) {
+        pointSound.play();
       }
     }
+  }, 200);
 
-    document.addEventListener("keydown", function (e) {
-      if (!gameActive && (e.code === "Space" || e.code.includes("Arrow"))) {
-        location.reload();
-      } else if (e.code === "Space" || e.code.includes("Arrow")) {
-        jump();
-      }
-    });
+  function jump() {
+    if (!stickman.classList.contains("jump")) {
+      stickman.classList.add("jump");
+      jumpSound.currentTime = 0;
+      jumpSound.play();
+      setTimeout(() => {
+        stickman.classList.remove("jump");
+      }, 500);
+    }
+  }
 
-    gameOver.addEventListener("click", () => {
+  document.addEventListener("keydown", function (e) {
+    if (!gameActive && (e.code === "Space" || e.code.includes("Arrow"))) {
       location.reload();
-    });
+    } else if (e.code === "Space" || e.code.includes("Arrow")) {
+      jump();
+    }
+  });
 
-    let collisionCheck = setInterval(() => {
-      let stickmanBottom = parseInt(window.getComputedStyle(stickman).getPropertyValue("bottom"));
-      let obstacleRight = parseInt(window.getComputedStyle(obstacle).getPropertyValue("right"));
+  gameOver.addEventListener("click", () => {
+    location.reload();
+  });
 
-      if (
-        obstacleRight > window.innerWidth - 120 &&
-        obstacleRight < window.innerWidth - 40 &&
-        stickmanBottom < 100 &&
-        gameActive
-      ) {
-        obstacle.style.animation = "none";
-        obstacle.style.right = obstacleRight + "px";
-        gameOver.style.display = "block";
-        gameActive = false;
-        clearInterval(scoreInterval);
-        hitSound.play();
+  let touchStartY = 0;
+  document.addEventListener("touchstart", function (e) {
+    touchStartY = e.touches[0].clientY;
+  });
 
-        if (score > highScore) {
-          localStorage.setItem("highScore", score);
-        }
+  document.addEventListener("touchend", function (e) {
+    const touchEndY = e.changedTouches[0].clientY;
+    const swipeUp = touchStartY - touchEndY > 30;
+
+    if (!gameActive) {
+      location.reload();
+    } else if (swipeUp || Math.abs(touchStartY - touchEndY) < 10) {
+      jump();
+    }
+  });
+
+  let collisionCheck = setInterval(() => {
+    let stickmanBottom = parseInt(window.getComputedStyle(stickman).getPropertyValue("bottom"));
+    let obstacleRight = parseInt(window.getComputedStyle(obstacle).getPropertyValue("right"));
+
+    if (
+      obstacleRight > window.innerWidth - 140 &&
+      obstacleRight < window.innerWidth - 40 &&
+      stickmanBottom < 150 &&
+      gameActive
+    ) {
+      obstacle.style.animation = "none";
+      obstacle.style.right = obstacleRight + "px";
+      gameOver.style.display = "block";
+      gameActive = false;
+      clearInterval(scoreInterval);
+      hitSound.play();
+
+      if (score > highScore) {
+        localStorage.setItem("highScore", score);
       }
-    }, 10);
-  </script>
+    }
+  }, 10);
+</script>
 </body>
 </html>
