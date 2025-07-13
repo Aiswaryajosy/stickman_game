@@ -135,12 +135,12 @@
   </div>
 
   <!-- Background and effect sounds -->
-  <audio id="bgMusic" src="https://cdn.pixabay.com/download/audio/2022/10/03/audio_7c24f281f3.mp3" loop autoplay></audio>
-  <audio id="jumpSound" src="https://freesound.org/data/previews/341/341695_62600-lq.mp3"></audio>
-  <audio id="hitSound" src="https://freesound.org/data/previews/331/331912_3248244-lq.mp3"></audio>
-  <audio id="pointSound" src="https://freesound.org/data/previews/458/458740_8045-lq.mp3"></audio>
-
-  <script>
+ <audio id="bgMusic" src="https://cdn.pixabay.com/download/audio/2023/03/23/audio_189ff43f0b.mp3" loop></audio>
+ <audio id="jumpSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_2bfa6e5d42.mp3"></audio> <!-- funny spring -->
+ <audio id="hitSound" src="https://freesound.org/data/previews/331/331912_3248244-lq.mp3"></audio>
+ <audio id="pointSound" src="https://cdn.pixabay.com/download/audio/2021/11/02/audio_c10f82b8e8.mp3"></audio> <!-- reward ping -->
+  
+   <script>
   const stickman = document.getElementById("stickman");
   const obstacle = document.getElementById("obstacle");
   const gameOver = document.getElementById("gameOver");
@@ -157,13 +157,12 @@
   highScoreDisplay.innerText = highScore;
   let gameActive = true;
 
+  bgMusic.play();
+
   let scoreInterval = setInterval(() => {
     if (gameActive) {
       score++;
       scoreDisplay.innerText = score;
-      if (score % 5 === 0) {
-        pointSound.play();
-      }
     }
   }, 200);
 
@@ -172,8 +171,14 @@
       stickman.classList.add("jump");
       jumpSound.currentTime = 0;
       jumpSound.play();
+
       setTimeout(() => {
         stickman.classList.remove("jump");
+
+        if (gameActive) {
+          pointSound.currentTime = 0;
+          pointSound.play();
+        }
       }, 500);
     }
   }
@@ -190,30 +195,14 @@
     location.reload();
   });
 
-  let touchStartY = 0;
-  document.addEventListener("touchstart", function (e) {
-    touchStartY = e.touches[0].clientY;
-  });
-
-  document.addEventListener("touchend", function (e) {
-    const touchEndY = e.changedTouches[0].clientY;
-    const swipeUp = touchStartY - touchEndY > 30;
-
-    if (!gameActive) {
-      location.reload();
-    } else if (swipeUp || Math.abs(touchStartY - touchEndY) < 10) {
-      jump();
-    }
-  });
-
   let collisionCheck = setInterval(() => {
     let stickmanBottom = parseInt(window.getComputedStyle(stickman).getPropertyValue("bottom"));
     let obstacleRight = parseInt(window.getComputedStyle(obstacle).getPropertyValue("right"));
 
     if (
-      obstacleRight > window.innerWidth - 140 &&
+      obstacleRight > window.innerWidth - 120 &&
       obstacleRight < window.innerWidth - 40 &&
-      stickmanBottom < 150 &&
+      stickmanBottom < 100 &&
       gameActive
     ) {
       obstacle.style.animation = "none";
@@ -222,6 +211,7 @@
       gameActive = false;
       clearInterval(scoreInterval);
       hitSound.play();
+      bgMusic.pause();
 
       if (score > highScore) {
         localStorage.setItem("highScore", score);
