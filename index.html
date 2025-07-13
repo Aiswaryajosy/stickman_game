@@ -57,67 +57,10 @@
       position: absolute;
       left: 50px;
       bottom: 60px;
-      width: 40px;
-      height: 120px;
-      background: transparent;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .stickman .head {
-      width: 22px;
-      height: 22px;
-      background: black;
-      border-radius: 55%;
-      margin-bottom: 1px;
-    }
-
-    .stickman .body {
-      width: 4px;
-      height: 45px;
-      background: black;
-      position: relative;
-    }
-
-    .stickman .left-arm,
-    .stickman .right-arm {
-      width: 18px;
-      height: 4px;
-      background: black;
-      position: absolute;
-      top: 10px;
-    }
-    
-    .stickman .left-arm {
-      left: -18px;
-      transform: rotate(25deg);
-      transform-origin: left center;
-    }
-    
-    .stickman .right-arm {
-      right: -18px;
-      transform: rotate(25deg):
-      transform-origin: right center;
-    }
-    
-    .stickman .left-leg,
-    .stickman .right-leg {
-      width: 4px;
-      height: 30px;
-      background: black;
-      position: absolute;
-      bottom: -30px;
-    }
-
-    .stickman .left-leg {
-      left: -6px;
-      transform: rotate(10deg);
-    }
-
-    .stickman .right-leg {
-      right: -6px;
-      transform: rotate(-10deg);
+      width: 50px; /* adjust width based on your image */
+      height: 50px; /* adjust height */
+      image-rendering: pixelated; /* keep the pixel look crisp */
+      z-index: 2;
     }
 
     .jump {
@@ -182,15 +125,7 @@
       Score: <span id="score">0</span><br>
       High Score: <span id="highScore">0</span>
     </div>
-    <div class="stickman" id="stickman">
-      <div class="head"></div>
-      <div class="body">
-        <div class="left-arm"></div>
-        <div class="right-arm"></div>
-        <div class="left-leg"></div>
-        <div class="right-leg"></div>
-      </div>
-    </div>
+    <img src="assets/pixel-character.png" class="stickman" id="stickman" />
     <div class="obstacle" id="obstacle"></div>
     <div class="ground"></div>
     <div class="game-over" id="gameOver">
