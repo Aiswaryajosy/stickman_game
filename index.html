@@ -135,7 +135,7 @@
   </div>
 
   <!-- Background and effect sounds -->
- <audio id="bgMusic" src="https://cdn.pixabay.com/download/audio/2023/03/23/audio_189ff43f0b.mp3" loop></audio>
+ <audio id="bgMusic" src="https://cdn.pixabay.com/download/audio/2023/03/23/audio_189ff43f0b.mp3?filename=funny-happy-background-143745.mp3" preload="auto" loop></audio>
  <audio id="jumpSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_2bfa6e5d42.mp3"></audio> <!-- funny spring -->
  <audio id="hitSound" src="https://freesound.org/data/previews/331/331912_3248244-lq.mp3"></audio>
  <audio id="pointSound" src="https://cdn.pixabay.com/download/audio/2021/11/02/audio_c10f82b8e8.mp3"></audio> <!-- reward ping -->
@@ -156,8 +156,6 @@
   let highScore = localStorage.getItem("highScore") || 0;
   highScoreDisplay.innerText = highScore;
   let gameActive = true;
-
-  bgMusic.play();
 
   let scoreInterval = setInterval(() => {
     if (gameActive) {
@@ -187,6 +185,9 @@
     if (!gameActive && (e.code === "Space" || e.code.includes("Arrow"))) {
       location.reload();
     } else if (e.code === "Space" || e.code.includes("Arrow")) {
+      if (bgMusic.paused) {
+        bgMusic.play().catch((e) => console.log("Music play blocked:", e));
+      }
       jump();
     }
   });
@@ -195,7 +196,10 @@
     if (!gameActive) {
       location.reload();
     } else {
-    jump();
+      if (bgMusic.paused) {
+        bgMusic.play().catch((e) => console.log("Music play blocked:", e));
+      }
+      jump();
     }
   });
 
