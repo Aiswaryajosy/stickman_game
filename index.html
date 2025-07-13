@@ -191,6 +191,14 @@
     }
   });
 
+  document.addEventListener("touchstart", function () {
+    if (!gameActive) {
+      location.reload();
+    } else {
+    jump();
+    }
+  });
+
   gameOver.addEventListener("click", () => {
     location.reload();
   });
