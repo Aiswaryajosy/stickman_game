@@ -1,2 +1,2 @@
 # stickman_game
-https://github.com/Aiswaryajosy/stickman_game.git
+https://aiswaryajosy.github.io/stickman_game/
